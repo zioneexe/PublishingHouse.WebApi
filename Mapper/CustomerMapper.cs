@@ -1,53 +1,54 @@
 ﻿using System;
-using PublishingHouse.Abstractions.Model;
-using PublishingHouse.DAL.Entity;
-using PublishingHouse.Shared.Model.Input;
+using PublishingHouse.Abstractions.Entity;
+using PublishingHouse.DAL.Model;
 using PublishingHouse.WebApi.Dto;
+using PublishingHouse.WebApi.Dto.AuthDto;
+using PublishingHouse.WebApi.Dto.Request;
+using PublishingHouse.WebApi.Dto.Response;
+using PublishingHouse.WebApi.Mapper.General;
 
 namespace PublishingHouse.WebApi.Mapper
 {
-    public static class CustomerMapper
+    public class CustomerMapper(ICustomer customer) : IMapper<ICustomer, CustomerRequestDto, CustomerResponseDto>, IUserMapper<ICustomer, RegisterCustomerRequestDto>
     {
-        public static CustomerDto ToResponseDto(this Customer customer)
+        public CustomerResponseDto ToResponseDto(ICustomer entity)
         {
-            ArgumentNullException.ThrowIfNull(customer, nameof(customer));
+            ArgumentNullException.ThrowIfNull(entity, nameof(entity));
 
-            return new CustomerDto
+            return new CustomerResponseDto
             {
-                CustomerId = customer.CustomerId,
-                CustomerTypeId = customer.CustomerTypeId,
-                Name = customer.Name,
-                AddressDate = customer.AddressDate,
-                Email = customer.Email,
-                CreateDateTime = customer.CreateDateTime,
-                UpdateDateTime = customer.UpdateDateTime,
+                CustomerId = entity.CustomerId,
+                CustomerTypeId = entity.CustomerTypeId,
+                Name = entity.Name,
+                AddressDate = entity.AddressDate,
+                Email = entity.Email,
             };
         }
 
-        public static CustomerInput ToInputModel(this CreateCustomerDto customerDto)
+        public ICustomer ToEntity(CustomerRequestDto dto)
         {
-            ArgumentNullException.ThrowIfNull(customerDto, nameof(customerDto));
+            ArgumentNullException.ThrowIfNull(dto, nameof(dto));
 
-            return new CustomerInput
-            {
-                CustomerTypeId = customerDto.CustomerTypeId,
-                Name = customerDto.Name,
-                AddressDate = customerDto.AddressDate,
-                Email = customerDto.Email,
-            };
+            customer.CustomerTypeId = dto.CustomerTypeId;
+            customer.Name = dto.Name;
+            customer.AddressDate = dto.AddressDate;
+            customer.Email = dto.Email;
+
+            return customer;
         }
 
-        public static CustomerInput ToInputModel(this UpdateCustomerDto customerDto)
+        public ICustomer ToEntity(RegisterCustomerRequestDto regDto, string userId)
         {
-            ArgumentNullException.ThrowIfNull(customerDto, nameof(customerDto));
+            ArgumentNullException.ThrowIfNull(regDto, nameof(regDto));
 
-            return new CustomerInput
-            {
-                CustomerTypeId = customerDto.CustomerTypeId,
-                Name = customerDto.Name,
-                AddressDate = customerDto.AddressDate,
-                Email = customerDto.Email,
-            };
+            customer.CustomerTypeId = Random.Shared.Next(1, 2);
+            customer.Name = regDto.UserName;
+            customer.AddressDate = DateOnly.FromDateTime(DateTime.UtcNow);
+            customer.Email = regDto.Email;
+            customer.UserId = userId;
+
+            return customer;
         }
     }
 }
+

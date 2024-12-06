@@ -1,85 +1,105 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using PublishingHouse.Abstractions.Model;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using PublishingHouse.Abstractions.Entity;
+using PublishingHouse.Abstractions.Exception;
 using PublishingHouse.Abstractions.Service;
-using PublishingHouse.DAL.Mapper;
 using PublishingHouse.WebApi.Dto;
+using PublishingHouse.WebApi.Dto.Request;
+using PublishingHouse.WebApi.Dto.Response;
 using PublishingHouse.WebApi.Mapper;
+using PublishingHouse.WebApi.Mapper.General;
 
-namespace PublishingHouse.WebApi.Controller;
-
-[ApiController]
-[Route("api/positions")]
-public class PositionController(IPositionService service) : ControllerBase
+namespace PublishingHouse.WebApi.Controller
 {
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
+    [ApiController]
+    [Route("api/positions")]
+    [Authorize(Roles = "Admin")]
+    public class PositionController(IPositionService service, IMapper<IPosition, PositionRequestDto, PositionResponseDto> mapper) : ControllerBase
     {
-        var positions = await service.GetAllAsync();
-
-        return Ok(positions);
-    }
-
-    [HttpGet("{id:int:min(1)}")]
-    public async Task<IActionResult> GetById([FromRoute] int id)
-    {
-        var position = await service.GetByIdAsync(id);
-        if (position == null)
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
         {
-            return NotFound();
-        }
-        return Ok(position);
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreatePositionDto positionDto)
-    {
-        var positionInput = positionDto.ToInputModel();
-        var position = await service.AddAsync(positionInput);
-
-        return CreatedAtAction(nameof(GetById), new { id = position.PositionId }, position);
-    }
-
-    [HttpPut("{id:int:min(1)}")]
-    public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdatePositionDto positionDto)
-    {
-        var existingPosition = await service.GetByIdAsync(id);
-        if (existingPosition == null)
-        {
-            return NotFound($"Position with ID {id} not found.");
+            try
+            {
+                var response = await service.GetAllAsync();
+                return Ok(response.Select(mapper.ToResponseDto));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            }
         }
 
-        var positionInput = positionDto.ToInputModel();
-        var position = await service.UpdateAsync(id, positionInput);
-
-        if (position == null)
+        [HttpGet("{id:int:min(1)}")]
+        public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            return BadRequest("Update operation failed.");
+            try
+            {
+                var response = await service.GetByIdAsync(id);
+                return Ok(mapper.ToResponseDto(response));
+            }
+            catch (RepositoryException e)
+            {
+                return BadRequest(e.Message);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            }
         }
 
-        return Ok(position);
-    }
-
-    [HttpDelete("{id:int:min(1)}")]
-    public async Task<IActionResult> Delete([FromRoute] int id)
-    {
-        var exists = await service.GetByIdAsync(id);
-        if (exists == null)
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] PositionRequestDto dto)
         {
-            return NotFound();
+            try
+            {
+                await service.AddAsync(mapper.ToEntity(dto));
+                return Created();
+            }
+            catch (RepositoryException e)
+            {
+                return BadRequest(e.Message);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            }
         }
 
-        await service.DeleteAsync(id);
-        return NoContent();
-    }
-
-    [HttpGet("{id:int:min(1)}/employees")]
-    public async Task<IActionResult> GetPositionWithEmployees([FromRoute] int id)
-    {
-        var position = await service.GetPositionWithEmployeesAsync(id);
-        if (position == null)
+        [HttpPut("{id:int:min(1)}")]
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] PositionRequestDto dto)
         {
-            return NotFound();
+            try
+            {
+                await service.UpdateAsync(id, mapper.ToEntity(dto));
+                return NoContent();
+            }
+            catch (RepositoryException e)
+            {
+                return BadRequest(e.Message);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            }
         }
-        return Ok(position);
+
+        [HttpDelete("{id:int:min(1)}")]
+        public async Task<IActionResult> Delete([FromRoute] int id)
+        {
+            try
+            {
+                await service.DeleteAsync(id);
+                return NoContent();
+            }
+            catch (RepositoryException e)
+            {
+                return BadRequest(e.Message);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            }
+        }
     }
 }

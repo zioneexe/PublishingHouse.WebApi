@@ -1,73 +1,54 @@
 ﻿using System;
-using PublishingHouse.Abstractions.Model;
-using PublishingHouse.DAL.Entity;
-using PublishingHouse.Shared.Model.Input;
+using PublishingHouse.Abstractions.Entity;
+using PublishingHouse.DAL.Model;
 using PublishingHouse.WebApi.Dto;
+using PublishingHouse.WebApi.Dto.Request;
+using PublishingHouse.WebApi.Dto.Response;
+using PublishingHouse.WebApi.Mapper.General;
 
 namespace PublishingHouse.WebApi.Mapper
 {
-    public static class BookMapper
-    { 
-        
-        public static BookDto ToResponseDto(this Book book)
+    public class BookMapper(IBook book) : IMapper<IBook, BookRequestDto, BookResponseDto>
+    {
+        public BookResponseDto ToResponseDto(IBook entity)
         {
-            ArgumentNullException.ThrowIfNull(book, nameof(book));
+            ArgumentNullException.ThrowIfNull(entity, nameof(entity));
 
-            return new BookDto
+            return new BookResponseDto
             {
-                BookId = book.BookId,
-                Name = book.Name,
-                AuthorId = book.AuthorId,
-                GenreId = book.GenreId,
-                Sku = book.Sku,
-                Isbn = book.Isbn,
-                Pages = book.Pages,
-                PublicationYear = book.PublicationYear,
-                Size = book.Size,
-                Weight = book.Weight,
-                Annotation = book.Annotation,
-                CreateDateTime = book.CreateDateTime,
-                UpdateDateTime = book.UpdateDateTime,
+                BookId = entity.BookId,
+                Name = entity.Name,
+                Author = entity.Author,
+                Genre = entity.Genre,
+                Sku = entity.Sku,
+                Isbn = entity.Isbn,
+                Pages = entity.Pages,
+                PublicationYear = entity.PublicationYear,
+                Size = entity.Size,
+                Weight = entity.Weight,
+                Annotation = entity.Annotation,
+                CoverImagePath = entity.CoverImagePath,
             };
         }
 
-       
-        public static BookInput ToInputModel(this CreateBookDto bookDto)
+        public IBook ToEntity(BookRequestDto dto)
         {
-            ArgumentNullException.ThrowIfNull(bookDto, nameof(bookDto));
+            ArgumentNullException.ThrowIfNull(dto, nameof(dto));
 
-            return new BookInput
-            {
-                Name = bookDto.Name,
-                AuthorId = bookDto.AuthorId,
-                GenreId = bookDto.GenreId,
-                Sku = bookDto.Sku,
-                Isbn = bookDto.Isbn,
-                Pages = bookDto.Pages,
-                PublicationYear = bookDto.PublicationYear,
-                Size = bookDto.Size,
-                Weight = bookDto.Weight,
-                Annotation = bookDto.Annotation,
-            };
+            book.Name = dto.Name;
+            book.Author = dto.Author;
+            book.Genre = dto.Genre;
+            book.Sku = dto.Sku;
+            book.Isbn = dto.Isbn;
+            book.Pages = dto.Pages;
+            book.PublicationYear = dto.PublicationYear;
+            book.Size = dto.Size;
+            book.Weight = dto.Weight;
+            book.Annotation = dto.Annotation;
+            book.CoverImagePath = dto.CoverImagePath;
+
+            return book;
         }
 
-        public static BookInput ToInputModel(this UpdateBookDto bookDto)
-        {
-            ArgumentNullException.ThrowIfNull(bookDto, nameof(bookDto));
-
-            return new BookInput
-            {
-                Name = bookDto.Name,
-                AuthorId = bookDto.AuthorId,
-                GenreId = bookDto.GenreId,
-                Sku = bookDto.Sku,
-                Isbn = bookDto.Isbn,
-                Pages = bookDto.Pages,
-                PublicationYear = bookDto.PublicationYear,
-                Size = bookDto.Size,
-                Weight = bookDto.Weight,
-                Annotation = bookDto.Annotation,
-            };
-        }
     }
 }

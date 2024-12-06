@@ -1,79 +1,61 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using PublishingHouse.Abstractions.Model;
-using PublishingHouse.DAL.Entity;
-using PublishingHouse.Shared.Model.Input;
+using PublishingHouse.Abstractions.Entity;
+using PublishingHouse.DAL.Model;
 using PublishingHouse.WebApi.Dto;
+using PublishingHouse.WebApi.Dto.Request;
+using PublishingHouse.WebApi.Dto.Response;
+using PublishingHouse.WebApi.Mapper.General;
 
 namespace PublishingHouse.WebApi.Mapper
 {
-    public static class PrintOrderMapper
+    public class PrintOrderMapper(IPrintOrder printOrder,
+        IMapper<ICustomer, CustomerRequestDto, CustomerResponseDto> customerMapper,
+        IMapper<IEmployee, EmployeeRequestDto, EmployeeResponseDto> employeeMapper,
+        IMapper<IOrderStatus, OrderStatusRequestDto, OrderStatusResponseDto> orderStatusMapper
+        ) : IMapper<IPrintOrder, PrintOrderRequestDto, PrintOrderResponseDto>
     {
-        public static PrintOrderDto ToResponseDto(this PrintOrder printOrder)
+        public PrintOrderResponseDto ToResponseDto(IPrintOrder entity)
         {
-            ArgumentNullException.ThrowIfNull(printOrder, nameof(printOrder));
+            ArgumentNullException.ThrowIfNull(entity, nameof(entity));
 
-            return new PrintOrderDto
+            return new PrintOrderResponseDto
             {
-                OrderId = printOrder.OrderId,
-                Number = printOrder.Number,
-                PrintType = printOrder.PrintType,
-                PaperType = printOrder.PaperType,
-                CoverType = printOrder.CoverType,
-                FasteningType = printOrder.FasteningType,
-                IsLaminated = printOrder.IsLaminated,
-                Price = printOrder.Price,
-                OrderStatusId = printOrder.OrderStatusId,
-                RegistrationDate = printOrder.RegistrationDate,
-                CompletionDate = printOrder.CompletionDate,
-                CustomerId = printOrder.CustomerId,
-                EmployeeId = printOrder.EmployeeId,
-                CreateDateTime = printOrder.CreateDateTime,
-                UpdateDateTime = printOrder.UpdateDateTime,
+                OrderId = entity.OrderId,
+                Number = entity.Number,
+                PrintType = entity.PrintType,
+                PaperType = entity.PaperType,
+                CoverType = entity.CoverType,
+                FasteningType = entity.FasteningType,
+                IsLaminated = entity.IsLaminated,
+                Price = entity.Price,
+                RegistrationDate = entity.RegistrationDate,
+                CompletionDate = entity.CompletionDate,
+                Customer = customerMapper.ToResponseDto(entity.Customer),
+                Employee = employeeMapper.ToResponseDto(entity.Employee),
+                OrderStatus = orderStatusMapper.ToResponseDto(entity.OrderStatus),
             };
         }
 
-        public static PrintOrderInput ToInputModel(this CreatePrintOrderDto printOrderDto)
+        public IPrintOrder ToEntity(PrintOrderRequestDto dto)
         {
-            ArgumentNullException.ThrowIfNull(printOrderDto, nameof(printOrderDto));
+            ArgumentNullException.ThrowIfNull(dto, nameof(dto));
 
-            return new PrintOrderInput
-            {
-                Number = printOrderDto.Number,
-                PrintType = printOrderDto.PrintType,
-                PaperType = printOrderDto.PaperType,
-                CoverType = printOrderDto.CoverType,
-                FasteningType = printOrderDto.FasteningType,
-                IsLaminated = printOrderDto.IsLaminated,
-                Price = printOrderDto.Price,
-                OrderStatusId = printOrderDto.OrderStatusId,
-                RegistrationDate = printOrderDto.RegistrationDate,
-                CompletionDate = printOrderDto.CompletionDate,
-                CustomerId = printOrderDto.CustomerId,
-                EmployeeId = printOrderDto.EmployeeId,
-            };
-        }
+            printOrder.Number = dto.Number;
+            printOrder.PrintType = dto.PrintType;
+            printOrder.PaperType = dto.PaperType;
+            printOrder.CoverType = dto.CoverType;
+            printOrder.FasteningType = dto.FasteningType;
+            printOrder.IsLaminated = dto.IsLaminated;
+            printOrder.Price = dto.Price;
+            printOrder.OrderStatusId = dto.OrderStatusId;
+            printOrder.RegistrationDate = dto.RegistrationDate;
+            printOrder.CompletionDate = dto.CompletionDate;
+            printOrder.CustomerId = dto.CustomerId;
+            printOrder.EmployeeId = dto.EmployeeId;
 
-        public static PrintOrderInput ToInputModel(this UpdatePrintOrderDto printOrderDto)
-        {
-            ArgumentNullException.ThrowIfNull(printOrderDto, nameof(printOrderDto));
-
-            return new PrintOrderInput
-            {
-                Number = printOrderDto.Number,
-                PrintType = printOrderDto.PrintType,
-                PaperType = printOrderDto.PaperType,
-                CoverType = printOrderDto.CoverType,
-                FasteningType = printOrderDto.FasteningType,
-                IsLaminated = printOrderDto.IsLaminated,
-                Price = printOrderDto.Price,
-                OrderStatusId = printOrderDto.OrderStatusId,
-                RegistrationDate = printOrderDto.RegistrationDate,
-                CompletionDate = printOrderDto.CompletionDate,
-                CustomerId = printOrderDto.CustomerId,
-                EmployeeId = printOrderDto.EmployeeId,
-            };
+            return printOrder;
         }
     }
 }

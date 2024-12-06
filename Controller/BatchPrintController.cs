@@ -1,74 +1,106 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PublishingHouse.Abstractions.Model;
+using PublishingHouse.Abstractions.Entity;
+using PublishingHouse.Abstractions.Exception;
 using PublishingHouse.Abstractions.Service;
-using PublishingHouse.DAL.Mapper;
 using PublishingHouse.WebApi.Dto;
+using PublishingHouse.WebApi.Dto.Request;
+using PublishingHouse.WebApi.Dto.Response;
 using PublishingHouse.WebApi.Mapper;
+using PublishingHouse.WebApi.Mapper.General;
+using PublishingHouse.WebApi;
+using Microsoft.AspNetCore.Authorization;
 
-namespace PublishingHouse.WebApi.Controller;
-
-[ApiController]
-[Route("api/batches")]
-public class BatchPrintController(IBatchPrintService service) : ControllerBase
+namespace PublishingHouse.WebApi.Controller
 {
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
+    [ApiController]
+    [Route("api/batches")]
+    [Authorize(Roles = "Admin, Employee")]
+    public class BatchPrintController(IBatchPrintService service, IMapper<IBatchPrint, BatchPrintRequestDto, BatchPrintResponseDto> mapper) : ControllerBase
     {
-        var batchPrints = await service.GetAllAsync();
-
-        return Ok(batchPrints);
-    }
-
-    [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetById([FromRoute] int id)
-    {
-        var batchPrint = await service.GetByIdAsync(id);
-        if (batchPrint == null)
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
         {
-            return NotFound();
-        }
-        return Ok(batchPrint);
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateBatchPrintDto batchPrintDto)
-    {
-        var batchPrintInput = batchPrintDto.ToInputModel();
-        var batchPrint = await service.AddAsync(batchPrintInput);
-
-        return CreatedAtAction(nameof(GetById), new { id = batchPrint.BatchPrintId }, batchPrint);
-    }
-
-    [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateBatchPrintDto batchPrintDto)
-    {
-        var existingBatchPrint = await service.GetByIdAsync(id);
-        if (existingBatchPrint == null)
-        {
-            return NotFound($"Batch print with ID {id} not found.");
+            try
+            {
+                var response = await service.GetAllAsync();
+                return Ok(response.Select(mapper.ToResponseDto));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            }
         }
 
-        var batchPrintInput = batchPrintDto.ToInputModel();
-        var batchPrint = await service.UpdateAsync(id, batchPrintInput);
-
-        if (batchPrint == null)
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            return BadRequest("Update operation failed.");
+            try
+            {
+                var response = await service.GetByIdAsync(id);
+                return Ok(mapper.ToResponseDto(response));
+            }
+            catch (RepositoryException e)
+            {
+                return BadRequest(e.Message);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            }
         }
 
-        return Ok(batchPrint);
-    }
-
-    [HttpDelete("{id:int}")]
-    public async Task<IActionResult> Delete([FromRoute] int id)
-    {
-        var exists = await service.GetByIdAsync(id);
-        if (exists == null)
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] BatchPrintRequestDto dto)
         {
-            return NotFound();
+            try
+            {
+                await service.AddAsync(mapper.ToEntity(dto));
+                return Created();
+            }
+            catch (RepositoryException e)
+            {
+                return BadRequest(e.Message);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            }
         }
 
-        await service.DeleteAsync(id);
-        return NoContent();
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] BatchPrintRequestDto dto)
+        {
+            try
+            {
+                await service.UpdateAsync(id, mapper.ToEntity(dto));
+                return NoContent();
+            }
+            catch (RepositoryException e)
+            {
+                return BadRequest(e.Message);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            }
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete([FromRoute] int id)
+        {
+            try
+            {
+                await service.DeleteAsync(id);
+                return NoContent();
+            }
+            catch (RepositoryException e)
+            {
+                return BadRequest(e.Message);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            }
+        }
     }
 }

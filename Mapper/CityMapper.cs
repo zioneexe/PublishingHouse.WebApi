@@ -1,47 +1,35 @@
 ﻿using System;
-using PublishingHouse.Abstractions.Model;
-using PublishingHouse.DAL.Entity;
-using PublishingHouse.Shared.Model.Input;
+using PublishingHouse.Abstractions.Entity;
+using PublishingHouse.DAL.Model;
 using PublishingHouse.WebApi.Dto;
+using PublishingHouse.WebApi.Dto.Request;
+using PublishingHouse.WebApi.Dto.Response;
+using PublishingHouse.WebApi.Mapper.General;
 
 namespace PublishingHouse.WebApi.Mapper
 {
-    public static class CityMapper
+    public class CityMapper(ICity city) : IMapper<ICity, CityRequestDto, CityResponseDto>
     {
-        public static CityDto ToResponseDto(this City city)
+        public CityResponseDto ToResponseDto(ICity entity)
         {
-            ArgumentNullException.ThrowIfNull(city, nameof(city));
+            ArgumentNullException.ThrowIfNull(entity, nameof(entity));
 
-            return new CityDto
+            return new CityResponseDto
             {
-                CityId = city.CityId,
-                RegionId = city.RegionId,
-                Name = city.Name,
-                CreateDateTime = city.CreateDateTime,
-                UpdateDateTime = city.UpdateDateTime,
+                CityId = entity.CityId,
+                RegionId = entity.RegionId,
+                Name = entity.Name,
             };
         }
 
-        public static CityInput ToInputModel(this CreateCityDto cityDto)
+        public ICity ToEntity(CityRequestDto dto)
         {
-            ArgumentNullException.ThrowIfNull(cityDto, nameof(cityDto));
+            ArgumentNullException.ThrowIfNull(dto, nameof(dto));
 
-            return new CityInput
-            {
-                RegionId = cityDto.RegionId,
-                Name = cityDto.Name,
-            };
-        }
+            city.RegionId = dto.RegionId;
+            city.Name = dto.Name;
 
-        public static CityInput ToInputModel(this UpdateCityDto cityDto)
-        {
-            ArgumentNullException.ThrowIfNull(cityDto, nameof(cityDto));
-
-            return new CityInput
-            {
-                RegionId = cityDto.RegionId,
-                Name = cityDto.Name,
-            };
+            return city;
         }
     }
 }

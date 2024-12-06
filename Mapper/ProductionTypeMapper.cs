@@ -1,44 +1,33 @@
 ﻿using System;
-using PublishingHouse.Abstractions.Model;
-using PublishingHouse.DAL.Entity;
-using PublishingHouse.Shared.Model.Input;
+using PublishingHouse.Abstractions.Entity;
+using PublishingHouse.DAL.Model;
 using PublishingHouse.WebApi.Dto;
+using PublishingHouse.WebApi.Dto.Request;
+using PublishingHouse.WebApi.Dto.Response;
+using PublishingHouse.WebApi.Mapper.General;
 
 namespace PublishingHouse.WebApi.Mapper
 {
-    public static class ProductionTypeMapper
+    public class ProductionTypeMapper(IProductionType productionType) : IMapper<IProductionType, ProductionTypeRequestDto, ProductionTypeResponseDto>
     {
-        public static ProductionTypeDto ToResponseDto(this ProductionType productionType)
+        public ProductionTypeResponseDto ToResponseDto(IProductionType entity)
         {
-            ArgumentNullException.ThrowIfNull(productionType, nameof(productionType));
+            ArgumentNullException.ThrowIfNull(entity, nameof(entity));
 
-            return new ProductionTypeDto
+            return new ProductionTypeResponseDto
             {
-                ProductionTypeId = productionType.ProductionTypeId,
-                Name = productionType.Name,
-                CreateDateTime = productionType.CreateDateTime,
-                UpdateDateTime = productionType.UpdateDateTime
+                ProductionTypeId = entity.ProductionTypeId,
+                Name = entity.Name,
             };
         }
 
-        public static ProductionTypeInput ToInputModel(this CreateProductionTypeDto productionTypeDto)
+        public IProductionType ToEntity(ProductionTypeRequestDto dto)
         {
-            ArgumentNullException.ThrowIfNull(productionTypeDto, nameof(productionTypeDto));
+            ArgumentNullException.ThrowIfNull(dto, nameof(dto));
 
-            return new ProductionTypeInput
-            {
-                Name = productionTypeDto.Name,
-            };
-        }
+            productionType.Name = dto.Name;
 
-        public static ProductionTypeInput ToInputModel(this UpdateProductionTypeDto productionTypeDto)
-        {
-            ArgumentNullException.ThrowIfNull(productionTypeDto, nameof(productionTypeDto));
-
-            return new ProductionTypeInput
-            {
-                Name = productionTypeDto.Name,
-            };
+            return productionType;
         }
     }
 }

@@ -1,44 +1,33 @@
 ﻿using System;
-using PublishingHouse.Abstractions.Model;
-using PublishingHouse.DAL.Entity;
-using PublishingHouse.Shared.Model.Input;
+using PublishingHouse.Abstractions.Entity;
+using PublishingHouse.DAL.Model;
 using PublishingHouse.WebApi.Dto;
+using PublishingHouse.WebApi.Dto.Request;
+using PublishingHouse.WebApi.Dto.Response;
+using PublishingHouse.WebApi.Mapper.General;
 
 namespace PublishingHouse.WebApi.Mapper
 {
-    public static class PositionMapper
+    public class PositionMapper(IPosition position) : IMapper<IPosition, PositionRequestDto, PositionResponseDto>
     {
-        public static PositionDto ToResponseDto(this Position position)
+        public PositionResponseDto ToResponseDto(IPosition entity)
         {
-            ArgumentNullException.ThrowIfNull(position, nameof(position));
+            ArgumentNullException.ThrowIfNull(entity, nameof(entity));
 
-            return new PositionDto
+            return new PositionResponseDto
             {
-                PositionId = position.PositionId,
-                Name = position.Name,
-                CreateDateTime = position.CreateDateTime,
-                UpdateDateTime = position.UpdateDateTime
+                PositionId = entity.PositionId,
+                Name = entity.Name,
             };
         }
 
-        public static PositionInput ToInputModel(this CreatePositionDto positionDto)
+        public IPosition ToEntity(PositionRequestDto dto)
         {
-            ArgumentNullException.ThrowIfNull(positionDto, nameof(positionDto));
+            ArgumentNullException.ThrowIfNull(dto, nameof(dto));
 
-            return new PositionInput
-            {
-                Name = positionDto.Name,
-            };
-        }
+            position.Name = dto.Name;
 
-        public static PositionInput ToInputModel(this UpdatePositionDto positionDto)
-        {
-            ArgumentNullException.ThrowIfNull(positionDto, nameof(positionDto));
-
-            return new PositionInput
-            {
-                Name = positionDto.Name,
-            };
+            return position;
         }
     }
 }

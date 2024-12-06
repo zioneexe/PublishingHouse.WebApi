@@ -1,51 +1,38 @@
 ﻿using System;
-using Humanizer.Localisation;
-using PublishingHouse.Abstractions.Model;
-using PublishingHouse.DAL.Entity;
-using PublishingHouse.Shared.Model.Input;
+using PublishingHouse.Abstractions.Entity;
+using PublishingHouse.DAL.Model;
 using PublishingHouse.WebApi.Dto;
+using PublishingHouse.WebApi.Dto.AuthDto;
+using PublishingHouse.WebApi.Dto.Request;
+using PublishingHouse.WebApi.Dto.Response;
+using PublishingHouse.WebApi.Mapper.General;
 
 namespace PublishingHouse.WebApi.Mapper
 {
-    public static class EmployeeMapper
+    public class EmployeeMapper(IEmployee employee) : IMapper<IEmployee, EmployeeRequestDto, EmployeeResponseDto>
     {
-        public static EmployeeDto ToResponseDto(this Employee employee)
+        public EmployeeResponseDto ToResponseDto(IEmployee entity)
         {
-            ArgumentNullException.ThrowIfNull(employee, nameof(employee));
+            ArgumentNullException.ThrowIfNull(entity, nameof(entity));
 
-            return new EmployeeDto
+            return new EmployeeResponseDto
             {
-                EmployeeId = employee.EmployeeId,
-                UserId = employee.UserId,
-                PositionId = employee.PositionId,
-                ProductionId = employee.ProductionId,
-                CreateDateTime = employee.CreateDateTime,
-                UpdateDateTime = employee.UpdateDateTime,
+                EmployeeId = entity.EmployeeId,
+                PositionId = entity.PositionId,
+                ProductionId = entity.ProductionId,
+                Name = entity.Name,
             };
         }
 
-        public static EmployeeInput ToInputModel(this CreateEmployeeDto employeeDto)
+        public IEmployee ToEntity(EmployeeRequestDto dto)
         {
-            ArgumentNullException.ThrowIfNull(employeeDto, nameof(employeeDto));
+            ArgumentNullException.ThrowIfNull(dto, nameof(dto));
 
-            return new EmployeeInput
-            {
-                UserId = employeeDto.UserId,
-                PositionId = employeeDto.PositionId,
-                ProductionId = employeeDto.ProductionId,
-            };
-        }
+            employee.PositionId = dto.PositionId;
+            employee.ProductionId = dto.ProductionId;
+            employee.Name = dto.Name;
 
-        public static EmployeeInput ToInputModel(this UpdateEmployeeDto employeeDto)
-        {
-            ArgumentNullException.ThrowIfNull(employeeDto, nameof(employeeDto));
-
-            return new EmployeeInput
-            {
-                UserId = employeeDto.UserId,
-                PositionId = employeeDto.PositionId,
-                ProductionId = employeeDto.ProductionId,
-            };
+            return employee;
         }
     }
 }

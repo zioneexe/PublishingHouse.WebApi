@@ -1,46 +1,36 @@
 ﻿using System;
 using System.Data;
 using System.Linq;
-using PublishingHouse.Abstractions.Model;
-using PublishingHouse.DAL.Entity;
-using PublishingHouse.Shared.Model.Input;
+using Microsoft.Extensions.Hosting;
+using PublishingHouse.Abstractions.Entity;
+using PublishingHouse.DAL.Model;
 using PublishingHouse.WebApi.Dto;
+using PublishingHouse.WebApi.Dto.Request;
+using PublishingHouse.WebApi.Dto.Response;
+using PublishingHouse.WebApi.Mapper.General;
 
 namespace PublishingHouse.WebApi.Mapper
 {
-    public static class RegionMapper
+    public class RegionMapper(IRegion region) : IMapper<IRegion, RegionRequestDto, RegionResponseDto>
     {
-        public static RegionDto ToResponseDto(this Region region)
+        public RegionResponseDto ToResponseDto(IRegion entity)
         {
-            ArgumentNullException.ThrowIfNull(region, nameof(region));
+            ArgumentNullException.ThrowIfNull(entity, nameof(entity));
 
-            return new RegionDto
+            return new RegionResponseDto
             {
-                RegionId = region.RegionId,
-                Name = region.Name,
-                CreateDateTime = region.CreateDateTime,
-                UpdateDateTime = region.UpdateDateTime,
+                RegionId = entity.RegionId,
+                Name = entity.Name,
             };
         }
 
-        public static RegionInput ToInputModel(this CreateRegionDto regionDto)
+        public IRegion ToEntity(RegionRequestDto dto)
         {
-            ArgumentNullException.ThrowIfNull(regionDto, nameof(regionDto));
+            ArgumentNullException.ThrowIfNull(dto, nameof(dto));
 
-            return new RegionInput
-            {
-                Name = regionDto.Name,
-            };
-        }
+            region.Name = dto.Name;
 
-        public static RegionInput ToInputModel(this UpdateRegionDto regionDto)
-        {
-            ArgumentNullException.ThrowIfNull(regionDto, nameof(regionDto));
-
-            return new RegionInput
-            {
-                Name = regionDto.Name,
-            };
+            return region;
         }
     }
 }

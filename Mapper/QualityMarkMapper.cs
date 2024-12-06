@@ -1,46 +1,35 @@
 ﻿using System;
 using System.Drawing.Drawing2D;
 using System.Linq;
-using PublishingHouse.Abstractions.Model;
-using PublishingHouse.DAL.Entity;
-using PublishingHouse.Shared.Model.Input;
+using PublishingHouse.Abstractions.Entity;
+using PublishingHouse.DAL.Model;
 using PublishingHouse.WebApi.Dto;
+using PublishingHouse.WebApi.Dto.Request;
+using PublishingHouse.WebApi.Dto.Response;
+using PublishingHouse.WebApi.Mapper.General;
 
 namespace PublishingHouse.WebApi.Mapper
 {
-    public static class QualityMarkMapper
+    public class QualityMarkMapper(IQualityMark qualityMark) : IMapper<IQualityMark, QualityMarkRequestDto, QualityMarkResponseDto>
     {
-        public static QualityMarkDto ToResponseDto(this QualityMark qualityMark)
+        public QualityMarkResponseDto ToResponseDto(IQualityMark entity)
         {
-            ArgumentNullException.ThrowIfNull(qualityMark, nameof(qualityMark));
+            ArgumentNullException.ThrowIfNull(entity, nameof(entity));
 
-            return new QualityMarkDto
+            return new QualityMarkResponseDto
             {
-                QualityMarkId = qualityMark.QualityMarkId,
-                Name = qualityMark.Name,
-                CreateDateTime = qualityMark.CreateDateTime,
-                UpdateDateTime = qualityMark.UpdateDateTime,
+                QualityMarkId = entity.QualityMarkId,
+                Name = entity.Name,
             };
         }
 
-        public static QualityMarkInput ToInputModel(this CreateQualityMarkDto qualityMarkDto)
+        public IQualityMark ToEntity(QualityMarkRequestDto dto)
         {
-            ArgumentNullException.ThrowIfNull(qualityMarkDto, nameof(qualityMarkDto));
+            ArgumentNullException.ThrowIfNull(dto, nameof(dto));
 
-            return new QualityMarkInput
-            {
-                Name = qualityMarkDto.Name,
-            };
-        }
+            qualityMark.Name = dto.Name;
 
-        public static QualityMarkInput ToInputModel(this UpdateQualityMarkDto qualityMarkDto)
-        {
-            ArgumentNullException.ThrowIfNull(qualityMarkDto, nameof(qualityMarkDto));
-
-            return new QualityMarkInput
-            {
-                Name = qualityMarkDto.Name,
-            };
+            return qualityMark;
         }
     }
 }

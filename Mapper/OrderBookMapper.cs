@@ -1,50 +1,39 @@
 ﻿using System;
-using PublishingHouse.Abstractions.Model;
-using PublishingHouse.DAL.Entity;
-using PublishingHouse.Shared.Model.Input;
+using PublishingHouse.Abstractions.Entity;
+using PublishingHouse.DAL.Model;
 using PublishingHouse.WebApi.Dto;
+using PublishingHouse.WebApi.Dto.Request;
+using PublishingHouse.WebApi.Dto.Response;
+using PublishingHouse.WebApi.Mapper.General;
 
 namespace PublishingHouse.WebApi.Mapper
 {
-    public static class OrderBookMapper
+    public class OrderBookMapper(IOrderBook orderBook,
+        IMapper<IBook, BookRequestDto, BookResponseDto> bookMapper
+        ) : IMapper<IOrderBook, OrderBookRequestDto, OrderBookResponseDto>
     {
-        public static OrderBookDto ToResponseDto(this OrderBook orderBook)
+        public OrderBookResponseDto ToResponseDto(IOrderBook entity)
         {
-            ArgumentNullException.ThrowIfNull(orderBook, nameof(orderBook));
+            ArgumentNullException.ThrowIfNull(entity, nameof(entity));
 
-            return new OrderBookDto
+            return new OrderBookResponseDto
             {
-                OrderBookId = orderBook.OrderBooksId,
-                OrderId = orderBook.OrderId,
-                BookId = orderBook.BookId,
-                BookQuantity = orderBook.BookQuantity,
-                CreateDateTime = orderBook.CreateDateTime,
-                UpdateDateTime = orderBook.UpdateDateTime,
+                OrderId = entity.OrderId,
+                BookId = entity.BookId,
+                BookQuantity = entity.BookQuantity,
+                Book = bookMapper.ToResponseDto(entity.Book)
             };
         }
 
-        public static OrderBookInput ToInputModel(this CreateOrderBookDto orderBookDto)
+        public IOrderBook ToEntity(OrderBookRequestDto dto)
         {
-            ArgumentNullException.ThrowIfNull(orderBookDto, nameof(orderBookDto));
+            ArgumentNullException.ThrowIfNull(dto, nameof(dto));
 
-            return new OrderBookInput
-            {
-                OrderId = orderBookDto.OrderId,
-                BookId = orderBookDto.BookId,
-                BookQuantity = orderBookDto.BookQuantity,
-            };
-        }
+            orderBook.OrderId = dto.OrderId;
+            orderBook.BookId = dto.BookId;
+            orderBook.BookQuantity = dto.BookQuantity;
 
-        public static OrderBookInput ToInputModel(this UpdateOrderBookDto orderBookDto)
-        {
-            ArgumentNullException.ThrowIfNull(orderBookDto, nameof(orderBookDto));
-
-            return new OrderBookInput
-            {
-                OrderId = orderBookDto.OrderId,
-                BookId = orderBookDto.BookId,
-                BookQuantity = orderBookDto.BookQuantity,
-            };
+            return orderBook;
         }
     }
 }

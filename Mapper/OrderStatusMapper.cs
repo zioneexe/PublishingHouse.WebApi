@@ -1,45 +1,33 @@
 ﻿using System;
-using Microsoft.CodeAnalysis.Elfie.Diagnostics;
-using PublishingHouse.Abstractions.Model;
-using PublishingHouse.DAL.Entity;
-using PublishingHouse.Shared.Model.Input;
+using PublishingHouse.Abstractions.Entity;
+using PublishingHouse.DAL.Model;
 using PublishingHouse.WebApi.Dto;
+using PublishingHouse.WebApi.Dto.Request;
+using PublishingHouse.WebApi.Dto.Response;
+using PublishingHouse.WebApi.Mapper.General;
 
 namespace PublishingHouse.WebApi.Mapper
 {
-    public static class OrderStatusMapper
+    public class OrderStatusMapper(IOrderStatus orderStatus) : IMapper<IOrderStatus, OrderStatusRequestDto, OrderStatusResponseDto>
     {
-        public static OrderStatusDto ToResponseDto(this OrderStatus orderStatus)
+        public OrderStatusResponseDto ToResponseDto(IOrderStatus entity)
         {
-            ArgumentNullException.ThrowIfNull(orderStatus, nameof(orderStatus));
+            ArgumentNullException.ThrowIfNull(entity, nameof(entity));
 
-            return new OrderStatusDto
+            return new OrderStatusResponseDto
             {
-                OrderStatusId = orderStatus.OrderStatusId,
-                Name = orderStatus.Name,
-                CreateDateTime = orderStatus.CreateDateTime,
-                UpdateDateTime = orderStatus.UpdateDateTime
+                OrderStatusId = entity.OrderStatusId,
+                Name = entity.Name,
             };
         }
 
-        public static OrderStatusInput ToInputModel(this CreateOrderStatusDto orderStatusDto)
+        public IOrderStatus ToEntity(OrderStatusRequestDto dto)
         {
-            ArgumentNullException.ThrowIfNull(orderStatusDto, nameof(orderStatusDto));
+            ArgumentNullException.ThrowIfNull(dto, nameof(dto));
 
-            return new OrderStatusInput
-            {
-                Name = orderStatusDto.Name,
-            };
-        }
+            orderStatus.Name = dto.Name;
 
-        public static OrderStatusInput ToInputModel(this UpdateOrderStatusDto orderStatusDto)
-        {
-            ArgumentNullException.ThrowIfNull(orderStatusDto, nameof(orderStatusDto));
-
-            return new OrderStatusInput
-            {
-                Name = orderStatusDto.Name,
-            };
+            return orderStatus;
         }
     }
 }

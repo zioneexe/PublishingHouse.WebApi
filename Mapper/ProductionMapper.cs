@@ -1,51 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
-using PublishingHouse.Abstractions.Model;
-using PublishingHouse.DAL.Entity;
-using PublishingHouse.Shared.Model.Input;
+using PublishingHouse.Abstractions.Entity;
+using PublishingHouse.DAL.Model;
 using PublishingHouse.WebApi.Dto;
+using PublishingHouse.WebApi.Dto.Request;
+using PublishingHouse.WebApi.Dto.Response;
+using PublishingHouse.WebApi.Mapper.General;
 
 namespace PublishingHouse.WebApi.Mapper
 {
-    public static class ProductionMapper
+    public class ProductionMapper(IProduction production) : IMapper<IProduction, ProductionRequestDto, ProductionResponseDto>
     {
-        public static ProductionDto ToResponseDto(this Production production)
+        public ProductionResponseDto ToResponseDto(IProduction entity)
         {
-            ArgumentNullException.ThrowIfNull(production, nameof(production));
+            ArgumentNullException.ThrowIfNull(entity, nameof(entity));
 
-            return new ProductionDto
+            return new ProductionResponseDto
             {
-                ProductionId = production.ProductionId,
-                ProductionTypeId = production.ProductionTypeId,
-                CityId = production.CityId,
-                Address = production.Address,
-                CreateDateTime = production.CreateDateTime,
-                UpdateDateTime = production.UpdateDateTime,
+                ProductionId = entity.ProductionId,
+                ProductionTypeId = entity.ProductionTypeId,
+                CityId = entity.CityId,
+                Address = entity.Address,
             };
         }
 
-        public static ProductionInput ToInputModel(this CreateProductionDto productionDto)
+        public IProduction ToEntity(ProductionRequestDto dto)
         {
-            ArgumentNullException.ThrowIfNull(productionDto, nameof(productionDto));
+            ArgumentNullException.ThrowIfNull(dto, nameof(dto));
 
-            return new ProductionInput
-            {
-                ProductionTypeId = productionDto.ProductionTypeId,
-                CityId = productionDto.CityId,
-                Address = productionDto.Address,
-            };
-        }
+            production.ProductionTypeId = dto.ProductionTypeId;
+            production.CityId = dto.CityId;
+            production.Address = dto.Address;
 
-        public static ProductionInput ToInputModel(this UpdateProductionDto productionDto)
-        {
-            ArgumentNullException.ThrowIfNull(productionDto, nameof(productionDto));
-
-            return new ProductionInput
-            {
-                ProductionTypeId = productionDto.ProductionTypeId,
-                CityId = productionDto.CityId,
-                Address = productionDto.Address,
-            };
+            return production;
         }
     }
 }
