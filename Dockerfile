@@ -11,16 +11,17 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 COPY ["PublishingHouse.WebApi/PublishingHouse.WebApi.csproj", "PublishingHouse.WebApi/"]
-COPY ["PublishingHouse.BLL/PublishingHouse.BLL.csproj", "BLL/"]
-COPY ["PublishingHouse.DAL/PublishingHouse.DAL.csproj", "DAL/"]
-COPY ["PublishingHouse.Abstractions/PublishingHouse.Abstractions.csproj", "Abstractions/"]
+COPY ["PublishingHouse.BLL/PublishingHouse.BLL.csproj", "PublishingHouse.BLL/"]
+COPY ["PublishingHouse.DAL/PublishingHouse.DAL.csproj", "PublishingHouse.DAL/"]
+COPY ["PublishingHouse.Abstractions/PublishingHouse.Abstractions.csproj", "PublishingHouse.Abstractions/"]
 
-COPY ./wwwroot ./wwwroot
+WORKDIR /src/PublishingHouse.WebApi
+RUN dotnet restore "PublishingHouse.WebApi.csproj"
 
-RUN dotnet restore "./PublishingHouse.WebApi.csproj"
-
+WORKDIR /src
 COPY . .
-WORKDIR "/src/."
+
+WORKDIR "/src/PublishingHouse.WebApi"
 RUN dotnet build "./PublishingHouse.WebApi.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
@@ -30,4 +31,5 @@ RUN dotnet publish "./PublishingHouse.WebApi.csproj" -c $BUILD_CONFIGURATION -o 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
 ENTRYPOINT ["dotnet", "PublishingHouse.WebApi.dll"]

@@ -16,12 +16,15 @@ namespace PublishingHouse.WebApi.Auth.Impl
         {
             var identityUser = await userManager.FindByEmailAsync(loginRequest.Email) ?? throw new AccessException("Invalid email.");
             var checkResult = await userManager.CheckPasswordAsync(identityUser, loginRequest.Password);
+
             if (!checkResult)
             {
                 throw new AccessException("Invalid password.");
             }
 
             var userRoles = await userManager.GetRolesAsync(identityUser);
+            Console.WriteLine(userRoles);
+
             if (userRoles == null || !userRoles.Any())
             {
                 throw new AccessException($"No roles assigned to user \"{identityUser.UserName}\".");
@@ -31,7 +34,7 @@ namespace PublishingHouse.WebApi.Auth.Impl
                        : userRoles.Contains(EmployeeRoleName) ? EmployeeRoleName
                        : userRoles.Contains(CustomerRoleName) ? CustomerRoleName
                        : userRoles.First();
-
+            
             var jwtToken = tokenService.CreateJwtToken(identityUser, userRoles);
 
             var response = new LoginResponseDto
@@ -40,6 +43,9 @@ namespace PublishingHouse.WebApi.Auth.Impl
                 Role = role,
                 Token = jwtToken,
             };
+            
+            Console.WriteLine("response");
+            Console.WriteLine(response);
 
             switch (role)
             {

@@ -11,17 +11,24 @@ namespace PublishingHouse.WebApi.Auth.Impl
     {
         public string CreateJwtToken(IdentityUser user, IList<string> roles)
         {
+            Console.WriteLine("Configuration Values:");
+            foreach (var kvp in configuration.AsEnumerable())
+            {
+                Console.WriteLine($"{kvp.Key}: {kvp.Value}");
+            }
+
             // Claims:
             var claims = new List<Claim>
             {
                 new (ClaimTypes.Name, user.UserName ?? throw new InvalidOperationException("Identity user username is null")),
-                new Claim("id", user.Id),
+                new("id", user.Id),
             };
 
             claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
             // Credentials:
             var configurationJwtKey = configuration["Jwt:Key"];
+            Console.WriteLine("jwtkey:", configurationJwtKey);
             if (string.IsNullOrEmpty(configurationJwtKey))
             {
                 throw new InvalidOperationException("Jwt:Key is not configured.");
@@ -37,6 +44,8 @@ namespace PublishingHouse.WebApi.Auth.Impl
                 claims: claims,
                 expires: DateTime.Now.AddHours(12),
                 signingCredentials: credentials);
+
+            Console.WriteLine(token);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }

@@ -29,13 +29,17 @@ namespace PublishingHouse.WebApi.Extensions
         {
             builder.Services.AddDbContext<PublishingHouseDbContext>(options =>
             {
-                options.UseSqlServer(builder.Configuration.GetConnectionString("CodeFirstConnectionString"));
+                options.UseSqlServer(
+                    builder.Configuration.GetConnectionString("CodeFirstConnectionString")
+                );
                 options.ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
             });
 
             builder.Services.AddDbContext<AuthDbContext>(options =>
             {
-                options.UseSqlServer(builder.Configuration.GetConnectionString("CodeFirstConnectionString"));
+                options.UseSqlServer(
+                    builder.Configuration.GetConnectionString("CodeFirstConnectionString")
+                );
                 options.ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
             });
         }
@@ -97,7 +101,7 @@ namespace PublishingHouse.WebApi.Extensions
             builder.Services.AddScoped<IMapper<IBook, BookRequestDto, BookResponseDto>, BookMapper>();
             builder.Services.AddScoped<IMapper<ICustomer, CustomerRequestDto, CustomerResponseDto>, CustomerMapper>();
             builder.Services.AddScoped<IMapper<ICustomerType, CustomerTypeRequestDto, CustomerTypeResponseDto>, CustomerTypeMapper>();
-            builder.Services.AddScoped <IMapper<IEmployee, EmployeeRequestDto, EmployeeResponseDto>, EmployeeMapper> ();
+            builder.Services.AddScoped<IMapper<IEmployee, EmployeeRequestDto, EmployeeResponseDto>, EmployeeMapper> ();
             builder.Services.AddScoped<IMapper<IOrderBook, OrderBookRequestDto, OrderBookResponseDto>, OrderBookMapper>();
             builder.Services.AddScoped<IMapper<IOrderStatus, OrderStatusRequestDto, OrderStatusResponseDto>, OrderStatusMapper>();
             builder.Services.AddScoped<IMapper<IPosition, PositionRequestDto, PositionResponseDto>, PositionMapper>();

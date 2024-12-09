@@ -17,6 +17,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHttpClient();
 
+builder.Logging.AddConsole().SetMinimumLevel(LogLevel.Debug);
+builder.Configuration.AddEnvironmentVariables();
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -38,6 +41,26 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
+    var services = scope.ServiceProvider;
+
+    try
+    {
+        var contextDb = services.GetRequiredService<PublishingHouseDbContext>();
+        contextDb.Database.Migrate();
+
+        var contextAuth = services.GetRequiredService<AuthDbContext>();
+        contextAuth.Database.Migrate();
+
+        Console.WriteLine("Migration successful!");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Migration failed: {ex.Message}");
+    }
+}
+
+using (var scope = app.Services.CreateScope())
+{
     await DatabaseSeeder.SeedDataAsync(scope.ServiceProvider);
 }
 
@@ -46,8 +69,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
 app.UseRouting();
 
